@@ -2,53 +2,70 @@ var Backbone = require('backbone');
 Backbone.LocalStorage = require('backbone.localstorage');
 
 
+var MenuItem = Backbone.Model.extend({
 
+});
+
+var MenuItemCollection = Backbone.Collection.extend({
+ model: MenuItem
+});
+
+
+
+
+// model of ordered item
 var OrderItem = Backbone.Model.extend({
-  defaults: {
-    'qty': 1
-  }
+ defaults: {
+   'qty': 1
+ }
 });
 
-// this is individually ordered items (these are the t-shirts)
-
+// order items that get stored to local storage
 var OrderItemCollection = Backbone.Collection.extend({
-  model: OrderItem
-  });
+ model: OrderItem
+ });
 
-
-
-// feeds localstorage collection
-
+// model for server stuff
 var Order = Backbone.Model.extend({
-  defaults: function(){
-    return {
-      username: '',
-      deliveryAddress: 'Somewhere, SC',
-      shirts: new OrderItemCollection()
-    }
-  },
-  initialize: function(config){
-    var config = config || {};
-    console.log('null here', config);
-    this.set('shirts', new OrderItemCollection(config.shirts));
-  },
-  urlRoot: 'https://tiny-lasagna-server.herokuapp.com/collections/koolkatshop',
-  parse: function(data){
-    data.shirts = new OrderItemCollection(data.shirts);
-    return data;
-  },
-  localStorage: new Backbone.LocalStorage("shirtOrder")
+
+ defaults: function(){
+   return {
+     username: '',
+     deliveryAddress: 'Somewhere, SC',
+     shirts: new OrderItemCollection()
+   }
+ },
+
+ initialize: function(config){
+   var config = config || {};
+   console.log('null here', config);
+   this.set('shirts', new OrderItemCollection(config.shirts));
+ },
+
+ parse: function(data){
+   data.shirts = new OrderItemCollection(data.shirts);
+   return data;
+ },
 });
 
-
-//
+// server stuff
 var OrderCollection = Backbone.Collection.extend({
-  model: Order
+ localStorage: new Backbone.LocalStorage("shirt-order"),
+ model: Order
 });
+
+var SentCollection = Backbone.Collection.extend({
+ url: 'https://tiny-lasagna-server.herokuapp.com/collections/koolkatshop',
+ model: Order
+});
+
 
 module.exports = {
-  OrderItem,
-  OrderItemCollection,
-  Order,
-  OrderCollection
+ MenuItem,
+ MenuItemCollection,
+ OrderItem,
+ OrderItemCollection,
+ Order,
+ OrderCollection,
+ SentCollection
 };

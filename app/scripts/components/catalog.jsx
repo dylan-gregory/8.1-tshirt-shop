@@ -1,10 +1,13 @@
 var React = require ('react');
 
-var OrderItemCollection = require('../models/models.js').OrderItemCollection;
-var OrderCollection = require('../models/models.js').OrderCollection;
-var Order = require('../models/models.js').Order;
+var MenuItem = require('../models/models.js').MenuItem;
+var MenuItemCollection = require('../models/models.js').MenuItemCollection;
 
-var CartContainer = require('./cart.jsx').CartContainer;
+var OrderItem = require('../models/models.js').OrderItem;
+var OrderItemCollection = require('../models/models.js').OrderItemCollection;
+
+var Order = require('../models/models.js').Order;
+var OrderCollection = require('../models/models.js').OrderCollection;
 
 
 class SiteContainer extends React.Component {
@@ -13,42 +16,33 @@ class SiteContainer extends React.Component {
 
     this.addToCart = this.addToCart.bind(this);
     // these are the t-shirts
-    var orderItemCollection = new OrderItemCollection();
+    var menuItemCollection = new MenuItemCollection();
 
-    // actual order that go to tiny-lasagna-server
-    var orderCollection = new OrderCollection();
-
-    orderItemCollection.add([
+    menuItemCollection.add([
       {name: 'DJ Space Kat', url: 'https://i1.wp.com/memecollection.net/wp-content/uploads/2013/12/space-cats-13.jpg?resize=540%2C535', description: 'D-d-d-d DJ KITTY'},
       {name: 'Burrito Kat', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDxp0chrSvvFqlhmP2F1oejXO67WqurEn4oKrzWO3tC9vzBL_flQ', description: 'Burritos and cats just go together'},
       {name: 'Laser Beams', url: 'https://f4.bcbits.com/img/a3034896636_10.jpg', description: 'One kat to rule the world'}
     ]);
-    //
-    // var orderData = JSON.parse(localStorage.getItem('order'));
-    //
-    // var order = new Order(orderData);
+
+    var orderData = JSON.parse(localStorage.getItem('shirt-order'));
+    // order is a model instance
+    var order = new Order(orderData);
 
 
     this.state = {
-      orderItemCollection,
-      orderCollection
+      menuItemCollection,
+      order
     };
   }
 
   addToCart(shirt) {
-    var newOrder = this.state.orderCollection;
-    
-
-
+    var order = this.state.order;
     var orderItem = shirt.toJSON();
-    console.log(this.state.orderCollection);
+    order.get('shirts').add(orderItem);
 
+    localStorage.setItem('order', JSON.stringify(order.toJSON()));
 
-    newOrder.get('shirts').add(shirt);
-    //
-    // localStorage.setItem('order', JSON.stringify(newOrder.toJSON()));
-    //
-    // this.setState({orderCollection: newOrder})
+    this.setState({order});
 
   }
   render() {
@@ -79,7 +73,7 @@ class SiteContainer extends React.Component {
           </nav>
           <div className="container">
             <ShirtList
-              orderItemCollection={this.state.orderItemCollection}
+              menuItemCollection={this.state.menuItemCollection}
               addToCart={this.addToCart}
             />
           </div>
@@ -92,7 +86,7 @@ class SiteContainer extends React.Component {
 class ShirtList extends React.Component {
   render() {
 
-    var shirtList = this.props.orderItemCollection.map(shirtItem =>{
+    var shirtList = this.props.menuItemCollection.map(shirtItem =>{
       return (
         <div className="col-sm-6 col-md-4" key={shirtItem.cid}>
           <div className="thumbnail">
