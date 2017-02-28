@@ -16,7 +16,8 @@ var MenuItemCollection = Backbone.Collection.extend({
 // model of ordered item
 var OrderItem = Backbone.Model.extend({
  defaults: {
-   'qty': 1
+   'qty': 1,
+   'size': 'Large'
  }
 });
 

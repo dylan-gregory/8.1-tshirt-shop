@@ -1,4 +1,6 @@
 var React = require ('react');
+var Modal = require('react-bootstrap').Modal;
+var Cookies = require('js-cookie');
 
 var MenuItem = require('../models/models.js').MenuItem;
 var MenuItemCollection = require('../models/models.js').MenuItemCollection;
@@ -31,8 +33,12 @@ class SiteContainer extends React.Component {
 
     this.state = {
       menuItemCollection,
-      order
+      order,
+      showModal: false,
     };
+
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   addToCart(shirt) {
@@ -44,6 +50,18 @@ class SiteContainer extends React.Component {
 
     this.setState({order});
 
+  }
+  openModal() {
+    // var signin = new SignInModal();
+    // signin.render();
+    this.setState({showModal: true});
+
+  }
+  closeModal() {
+    return this.setState({showModal: false});
+  }
+  addUsername(username){
+    return Cookies.set('username', username);
   }
   render() {
 
@@ -68,14 +86,21 @@ class SiteContainer extends React.Component {
                     <li className="active" ><a href="#">Shirts<span className="sr-only">(current)</span></a></li>
                     <li><a href="#cart"> Your Cart</a></li>
                   </ul>
+                    <button onClick={this.openModal} type="button" className="btn btn-default navbar-btn">Sign in</button>
+                    <span>Hello - you're signed in as {Cookies.get('username')}</span>
                 </div>
             </div>
           </nav>
           <div className="container">
+
+            <SignInModal openModal={this.state.showModal} closeModal={this.closeModal} addUsername={this.addUsername}/>
+
             <ShirtList
               menuItemCollection={this.state.menuItemCollection}
               addToCart={this.addToCart}
             />
+
+
           </div>
         </div>
       )
@@ -122,6 +147,59 @@ class ShirtList extends React.Component {
     )
   }
 }
+
+class SignInModal extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {showModal: false};
+    this.close = this.close.bind(this);
+    this.open = this.open.bind(this);
+    this.handleUsername = this.handleUsername.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  componentWillReceiveProps(openModal){
+
+    this.setState({showModal: this.props.openModal});
+  }
+  close() {
+
+    this.setState({showModal: false});
+  }
+  open(){
+    this.setState({showModal:true});
+  }
+  handleUsername(e) {
+    e.preventDefault();
+    this.setState({username: e.target.value});
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+
+    this.props.addUsername(this.state.username);
+  }
+  render(){
+
+    return (
+      <div>
+        <Modal show={this.state.showModal} onHide={this.close}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <span>You haven't logged in yet!</span>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input type="text" onChange={this.handleUsername} placeholder='username' />
+            <button onClick={this.handleSubmit}>Sign me in!</button>
+          </Modal.Body>
+          <Modal.Footer>
+            <button onClick={this.close}>Close</button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    );
+  }
+};
 
 
 

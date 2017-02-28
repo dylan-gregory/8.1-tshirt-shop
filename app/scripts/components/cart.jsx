@@ -1,4 +1,5 @@
 var React = require ('react');
+var Cookies = require('js-cookie');
 
 var Order = require('../models/models.js').Order;
 var SentCollection = require('../models/models.js').SentCollection;
@@ -13,15 +14,18 @@ class CartContainer extends React.Component {
    console.log('model', order.toJSON());
 
    this.placeOrder = this.placeOrder.bind(this);
+
    this.state = {
      order
    }
+    console.log('here', this.state.order);
  }
-
  placeOrder() {
-   console.log(this.state);
+
    var sentCollection = new SentCollection();
    sentCollection.create(this.state.order.toJSON());
+   localStorage.clear();
+   this.forceUpdate();
  }
 
  render() {
@@ -45,16 +49,53 @@ class CartContainer extends React.Component {
                  <li><a href="#">Shirts</a></li>
                  <li className="active"><a href="#cart"> Your Cart<span className="sr-only">(current)</span></a></li>
                </ul>
+               <span>Hello - you're signed in as {Cookies.get('username')}</span>
              </div>
          </div>
        </nav>
        <div className="container">
 
-         <button onClick={this.placeOrder}>Click Me!</button>
+         <CartList order={this.state.order} />
+
+         <button onClick={this.placeOrder}>Send my order!</button>
        </div>
      </div>
    )
  }
+}
+
+class CartList extends React.Component {
+  render() {
+    var shirtList = this.props.order.get('shirts');
+    console.log(shirtList);
+
+  var cartList = shirtList.map((shirt) => {
+    return (
+
+      <div className="col-md-12 order-list" key={shirt.cid}>
+        <div className="row">
+          <span className="col-md-3">{shirt.get('name')}</span>
+          <span className="col-md-3">{shirt.get('size')}</span>
+          <span className="col-md-3">time</span>
+          <span className="col-md-3"><button className="btn btn-danger">Delete</button></span>
+
+        </div>
+      </div>
+    )
+  });
+
+  return (
+    <div className="row">
+      <div className="row">
+        <span className="col-md-3">Shirt name</span>
+        <span className="col-md-3">Shirt size</span>
+        <span className="col-md-3">Expiration time</span>
+        <span className="col-md-3">Remove them if you dare!</span>
+      </div>
+      {cartList}
+    </div>
+  )
+  }
 }
 
 module.exports = {
